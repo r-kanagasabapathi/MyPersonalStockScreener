@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   Settings2, 
@@ -29,23 +29,23 @@ import { motion, AnimatePresence } from 'motion/react';
 import { INDIAN_STOCKS } from './data/stocks';
 import { Stock, Sector, ScreenerFilters } from './types';
 
-// Column Visibility State
+// Column Visibility & Width State
 type ColumnKey = keyof Stock | 'actions';
 
 const COLUMN_LABELS: Record<string, string> = {
   symbol: 'Sym',
   name: 'Company',
   sector: 'Sector',
-  marketCapCr: 'Market Cap',
+  marketCapCr: 'M-Cap',
   promoterHoldingTrend: 'Promoter',
   pledgedHoldingPct: 'Pledge %',
-  debtToEquity: 'D/E Ratio',
-  interestCoverageRatio: 'Int. Cov',
+  debtToEquity: 'Debt/Eq',
+  interestCoverageRatio: 'Int.Cov',
   avgRoce5y: 'ROCE 5Y',
   avgRoe5y: 'ROE 5Y',
-  ebitdaMarginPct: 'Op. Margin',
-  netProfitMarginPct: 'PAT Margin',
-  cashFlowMarginPct: 'CFO Margin',
+  ebitdaMarginPct: 'Op.Marg %',
+  netProfitMarginPct: 'PAT %',
+  cashFlowMarginPct: 'CFO %',
   freeCashFlowCr: 'FCF (Cr)',
   revenueGrowth5y: 'Rev Gr 5Y',
   ebitdaGrowth5y: 'Op. Gr 5Y',
@@ -55,7 +55,6 @@ const COLUMN_LABELS: Record<string, string> = {
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   'symbol',
-  'sector',
   'marketCapCr',
   'promoterHoldingTrend',
   'pledgedHoldingPct',
@@ -97,9 +96,29 @@ export default function App() {
   });
 
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_VISIBLE_COLUMNS);
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [showColumnManager, setShowColumnManager] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: ColumnKey; direction: 'asc' | 'desc' } | null>(null);
+
+  // Resizing logic
+  const handleResize = (key: string, e: React.MouseEvent) => {
+    const startX = e.pageX;
+    const startWidth = columnWidths[key] || 120; // Default width
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(startWidth + (moveEvent.pageX - startX), 60);
+      setColumnWidths(prev => ({ ...prev, [key]: newWidth }));
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
 
   // Simulated Live Data Refresh
   const handleRefresh = () => {
@@ -557,20 +576,29 @@ export default function App() {
 
         {/* Results Table */}
         <div className="flex-1 border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col bg-white">
-          <div className="flex-1 overflow-auto">
-            <table className="w-full text-left border-collapse table-auto">
+          <div className="flex-1 overflow-auto no-scrollbar">
+            <table className="w-full text-left border-collapse table-fixed min-w-max">
               <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                 <tr className="h-12">
                   {visibleColumns.map((key) => (
                     <th 
                       key={key} 
-                      onClick={() => handleSort(key)}
-                      className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group whitespace-nowrap min-w-max"
+                      style={{ width: columnWidths[key] || 'auto', minWidth: key === 'symbol' ? '70px' : '90px' }}
+                      className="relative px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider group"
                     >
-                      <div className="flex items-center gap-1.5">
-                        {COLUMN_LABELS[key]}
-                        <ArrowUpDown className={`w-2.5 h-2.5 transition-opacity ${sortConfig?.key === key ? 'text-indigo-600 opacity-100' : 'opacity-20 group-hover:opacity-100'}`} />
+                      <div 
+                        className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-600 transition-colors"
+                        onClick={() => handleSort(key)}
+                      >
+                        <span className="truncate">{COLUMN_LABELS[key]}</span>
+                        <ArrowUpDown className={`w-2.5 h-2.5 shrink-0 transition-opacity ${sortConfig?.key === key ? 'text-indigo-600 opacity-100' : 'opacity-20 group-hover:opacity-100'}`} />
                       </div>
+                      
+                      {/* Resize Handle */}
+                      <div 
+                        onMouseDown={(e) => handleResize(key, e)}
+                        className="absolute right-0 top-0 bottom-0 w-1 bg-slate-200 opacity-0 group-hover:opacity-100 cursor-col-resize hover:bg-indigo-400 transition-all z-20"
+                      />
                     </th>
                   ))}
                 </tr>
