@@ -43,8 +43,13 @@ export interface ScreenerFilters {
   maxPledged: number;
   minRoce: number;
   minRoe: number;
-  minEbitdaMargin: number;
+  minOperatingMargin: number;
   minNetProfitMargin: number;
+  minCashFlowMargin: number;
   minRevenueGrowth: number;
+  minOperatingGrowth: number;
+  minEpsGrowth: number;
+  maxDebtToEquity: number;
+  minInterestCoverage: number;
   onlyIncreasingPromoter: boolean;
 }
