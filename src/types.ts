@@ -1,0 +1,50 @@
+export enum Sector {
+  IT = 'Information Technology',
+  Banking = 'Banking',
+  FMCG = 'FMCG',
+  Energy = 'Energy',
+  Auto = 'Automobile',
+  Pharma = 'Pharma',
+  Finance = 'NBFC',
+  Metals = 'Metals & Mining',
+  Telecom = 'Telecom',
+  Construction = 'Construction',
+  Retail = 'Retail'
+}
+
+export interface Stock {
+  id: string;
+  symbol: string;
+  name: string;
+  sector: Sector;
+  isFinance: boolean;
+  marketCapCr: number;
+  promoterHoldingTrend: 'Increasing' | 'Decreasing' | 'Stable';
+  pledgedHoldingPct: number;
+  debtToEquity: number | null; // null for Finance
+  interestCoverageRatio: number | null; // null for Finance
+  avgRoce5y: number;
+  avgRoe5y: number;
+  ebitdaMarginPct: number;
+  netProfitMarginPct: number;
+  cashFlowMarginPct: number;
+  freeCashFlowCr: number;
+  revenueGrowth5y: number;
+  ebitdaGrowth5y: number;
+  epsGrowth5y: number;
+  price: number;
+  vibe: string; // Brief description
+}
+
+export interface ScreenerFilters {
+  search: string;
+  sector: Sector | 'All';
+  minMarketCap: number;
+  maxPledged: number;
+  minRoce: number;
+  minRoe: number;
+  minEbitdaMargin: number;
+  minNetProfitMargin: number;
+  minRevenueGrowth: number;
+  onlyIncreasingPromoter: boolean;
+}
