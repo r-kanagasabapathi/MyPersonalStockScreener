@@ -33,35 +33,44 @@ import { Stock, Sector, ScreenerFilters } from './types';
 type ColumnKey = keyof Stock | 'actions';
 
 const COLUMN_LABELS: Record<string, string> = {
-  symbol: 'Symbol',
-  name: 'Company Name',
-  sector: 'Industrial Sector',
-  marketCapCr: 'Market Capitalization (Cr)',
-  promoterHoldingTrend: 'Promoter Holding Trend',
-  pledgedHoldingPct: 'Pledged Promoter Holding %',
-  debtToEquity: 'Total Debt to Equity Ratio',
-  interestCoverageRatio: 'Interest Coverage Ratio',
-  avgRoce5y: '5Y Average Return on Capital Employed',
-  avgRoe5y: '5Y Average Return on Equity',
-  ebitdaMarginPct: 'Operating Margin %',
-  netProfitMarginPct: 'Net Profit Margin %',
-  cashFlowMarginPct: 'Cash Flow Margin %',
-  freeCashFlowCr: 'Free Cash Flow (Cr)',
-  revenueGrowth5y: '5Y Revenue Growth %',
-  ebitdaGrowth5y: '5Y Operating Growth %',
-  epsGrowth5y: '5Y Earnings per Share Growth %',
-  price: 'Current Price',
+  symbol: 'Sym',
+  name: 'Company',
+  sector: 'Sector',
+  marketCapCr: 'Market Cap',
+  promoterHoldingTrend: 'Promoter',
+  pledgedHoldingPct: 'Pledge %',
+  debtToEquity: 'D/E Ratio',
+  interestCoverageRatio: 'Int. Cov',
+  avgRoce5y: 'ROCE 5Y',
+  avgRoe5y: 'ROE 5Y',
+  ebitdaMarginPct: 'Op. Margin',
+  netProfitMarginPct: 'PAT Margin',
+  cashFlowMarginPct: 'CFO Margin',
+  freeCashFlowCr: 'FCF (Cr)',
+  revenueGrowth5y: 'Rev Gr 5Y',
+  ebitdaGrowth5y: 'Op. Gr 5Y',
+  epsGrowth5y: 'EPS Gr 5Y',
+  price: 'Price',
 };
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   'symbol',
-  'name',
+  'sector',
   'marketCapCr',
-  'avgRoce5y',
+  'promoterHoldingTrend',
+  'pledgedHoldingPct',
   'debtToEquity',
-  'revenueGrowth5y',
+  'interestCoverageRatio',
+  'avgRoce5y',
+  'avgRoe5y',
+  'ebitdaMarginPct',
   'netProfitMarginPct',
-  'promoterHoldingTrend'
+  'cashFlowMarginPct',
+  'freeCashFlowCr',
+  'revenueGrowth5y',
+  'ebitdaGrowth5y',
+  'epsGrowth5y',
+  'price'
 ];
 
 export default function App() {
@@ -549,14 +558,14 @@ export default function App() {
         {/* Results Table */}
         <div className="flex-1 border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col bg-white">
           <div className="flex-1 overflow-auto">
-            <table className="w-full text-left border-collapse table-auto min-w-max">
+            <table className="w-full text-left border-collapse table-auto">
               <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
-                <tr className="h-10">
+                <tr className="h-12">
                   {visibleColumns.map((key) => (
                     <th 
                       key={key} 
                       onClick={() => handleSort(key)}
-                      className="px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group whitespace-nowrap"
+                      className="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors group whitespace-nowrap min-w-max"
                     >
                       <div className="flex items-center gap-1.5">
                         {COLUMN_LABELS[key]}
@@ -571,10 +580,10 @@ export default function App() {
                   filteredStocks.map((stock) => (
                     <tr 
                       key={stock.id} 
-                      className="h-12 hover:bg-slate-50 transition-colors group"
+                      className="hover:bg-slate-50 transition-colors group"
                     >
                       {visibleColumns.map((key) => (
-                        <td key={key} className="px-4 py-2">
+                        <td key={key} className="px-4 py-3 whitespace-nowrap">
                           {renderValue(key, stock[key as keyof Stock], stock)}
                         </td>
                       ))}
