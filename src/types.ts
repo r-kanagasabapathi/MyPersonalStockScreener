@@ -33,6 +33,15 @@ export interface Stock {
   ebitdaGrowth5y: number;
   epsGrowth5y: number;
   price: number;
+  bookValue: number;
+  faceValue: number;
+  pe: number;
+  sectorPe: number;
+  avgRoce3y: number;
+  avgRoe3y: number;
+  revenueGrowth3y: number;
+  ebitdaGrowth3y: number;
+  epsGrowth3y: number;
   vibe: string; // Brief description
 }
 
@@ -51,5 +60,11 @@ export interface ScreenerFilters {
   minEpsGrowth: number;
   maxDebtToEquity: number;
   minInterestCoverage: number;
+  minRoce3y: number;
+  minRoe3y: number;
+  minRevenueGrowth3y: number;
+  minOperatingGrowth3y: number;
+  minEpsGrowth3y: number;
+  maxPe: number;
   onlyIncreasingPromoter: boolean;
 }

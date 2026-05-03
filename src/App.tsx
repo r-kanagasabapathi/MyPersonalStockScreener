@@ -51,6 +51,15 @@ const COLUMN_LABELS: Record<string, string> = {
   ebitdaGrowth5y: 'Op. Gr 5Y',
   epsGrowth5y: 'EPS Gr 5Y',
   price: 'Price',
+  bookValue: 'Book Value',
+  faceValue: 'Face Value',
+  pe: 'P/E',
+  sectorPe: 'Sec. P/E',
+  avgRoce3y: 'ROCE 3Y',
+  avgRoe3y: 'ROE 3Y',
+  revenueGrowth3y: 'Rev Gr 3Y',
+  ebitdaGrowth3y: 'Op. Gr 3Y',
+  epsGrowth3y: 'EPS Gr 3Y',
 };
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
@@ -69,7 +78,16 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   'revenueGrowth5y',
   'ebitdaGrowth5y',
   'epsGrowth5y',
-  'price'
+  'price',
+  'bookValue',
+  'faceValue',
+  'pe',
+  'sectorPe',
+  'avgRoce3y',
+  'avgRoe3y',
+  'revenueGrowth3y',
+  'ebitdaGrowth3y',
+  'epsGrowth3y'
 ];
 
 export default function App() {
@@ -92,6 +110,12 @@ export default function App() {
     minEpsGrowth: 10,
     maxDebtToEquity: 1,
     minInterestCoverage: 3,
+    minRoce3y: 15,
+    minRoe3y: 12,
+    minRevenueGrowth3y: 10,
+    minOperatingGrowth3y: 12,
+    minEpsGrowth3y: 10,
+    maxPe: 50,
     onlyIncreasingPromoter: false,
   });
 
@@ -135,7 +159,9 @@ export default function App() {
           ...stock,
           price: Number(newPrice.toFixed(2)),
           freeCashFlowCr: stock.freeCashFlowCr + (Math.random() * 10 - 5),
-          ebitdaMarginPct: Math.max(0, stock.ebitdaMarginPct + (Math.random() * 0.2 - 0.1))
+          ebitdaMarginPct: Math.max(0, stock.ebitdaMarginPct + (Math.random() * 0.2 - 0.1)),
+          bookValue: stock.bookValue + (Math.random() * 2 - 1),
+          pe: Math.max(1, stock.pe + (Math.random() * 0.5 - 0.25))
         };
       });
 
@@ -177,10 +203,18 @@ export default function App() {
       const passDebtToEquity = stock.isFinance || (stock.debtToEquity !== null && stock.debtToEquity <= filters.maxDebtToEquity);
       const passInterestCoverage = stock.isFinance || (stock.interestCoverageRatio !== null && stock.interestCoverageRatio >= filters.minInterestCoverage);
       
+      const passRoce3y = stock.avgRoce3y >= filters.minRoce3y;
+      const passRoe3y = stock.avgRoe3y >= filters.minRoe3y;
+      const passRevenueGrowth3y = stock.revenueGrowth3y >= filters.minRevenueGrowth3y;
+      const passOperatingGrowth3y = stock.ebitdaGrowth3y >= filters.minOperatingGrowth3y;
+      const passEpsGrowth3y = stock.epsGrowth3y >= filters.minEpsGrowth3y;
+      const passPe = stock.pe <= filters.maxPe;
+
       return matchesSearch && matchesSector && passMarketCap && passPromoter && passPledged && 
              passRoce && passRoe && passOperatingMargin && passNetProfitMargin && passCashFlowMargin &&
              passRevenueGrowth && passOperatingGrowth && passEpsGrowth && 
-             passFcf && passDebtToEquity && passInterestCoverage;
+             passFcf && passDebtToEquity && passInterestCoverage &&
+             passRoce3y && passRoe3y && passRevenueGrowth3y && passOperatingGrowth3y && passEpsGrowth3y && passPe;
     }).sort((a, b) => {
       if (!sortConfig) return 0;
       const { key, direction } = sortConfig;
@@ -457,6 +491,35 @@ export default function App() {
                       onChange={(v) => setFilters({...filters, minRoe: v})}
                       suffix="%"
                     />
+
+                    <FilterSlider 
+                      label="Minimum 3Y Avg Return on Capital" 
+                      value={filters.minRoce3y} 
+                      min={0} max={100} step={1} 
+                      onChange={(v) => setFilters({...filters, minRoce3y: v})}
+                      suffix="%"
+                    />
+
+                    <FilterSlider 
+                      label="Minimum 3Y Avg Return on Equity" 
+                      value={filters.minRoe3y} 
+                      min={0} max={100} step={1} 
+                      onChange={(v) => setFilters({...filters, minRoe3y: v})}
+                      suffix="%"
+                    />
+                  </div>
+
+                  {/* Valuation */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest border-b border-indigo-50 pb-1">Valuation</h4>
+                    
+                    <FilterSlider 
+                      label="Maximum P/E Ratio" 
+                      value={filters.maxPe} 
+                      min={1} max={200} step={1} 
+                      onChange={(v) => setFilters({...filters, maxPe: v})}
+                      suffix=""
+                    />
                   </div>
 
                   {/* Margins */}
@@ -517,6 +580,35 @@ export default function App() {
                     />
                   </div>
 
+                  {/* Growth 3Y */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest border-b border-indigo-50 pb-1">Medium-term Growth (3 Year)</h4>
+                    
+                    <FilterSlider 
+                      label="Minimum Revenue Growth 3Y %" 
+                      value={filters.minRevenueGrowth3y} 
+                      min={0} max={100} step={1} 
+                      onChange={(v) => setFilters({...filters, minRevenueGrowth3y: v})}
+                      suffix="%"
+                    />
+
+                    <FilterSlider 
+                      label="Minimum Operating Growth 3Y %" 
+                      value={filters.minOperatingGrowth3y} 
+                      min={0} max={100} step={1} 
+                      onChange={(v) => setFilters({...filters, minOperatingGrowth3y: v})}
+                      suffix="%"
+                    />
+
+                    <FilterSlider 
+                      label="Minimum EPS Growth 3Y %" 
+                      value={filters.minEpsGrowth3y} 
+                      min={0} max={100} step={1} 
+                      onChange={(v) => setFilters({...filters, minEpsGrowth3y: v})}
+                      suffix="%"
+                    />
+                  </div>
+
                   {/* Solvency */}
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest border-b border-indigo-50 pb-1">Efficiency & Solvency</h4>
@@ -556,6 +648,12 @@ export default function App() {
                       minEpsGrowth: 10,
                       maxDebtToEquity: 1,
                       minInterestCoverage: 3,
+                      minRoce3y: 15,
+                      minRoe3y: 12,
+                      minRevenueGrowth3y: 10,
+                      minOperatingGrowth3y: 12,
+                      minEpsGrowth3y: 10,
+                      maxPe: 50,
                       onlyIncreasingPromoter: false,
                     })}
                     className="py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest"
@@ -691,8 +789,10 @@ function renderValue(key: ColumnKey, value: any, stock: Stock) {
     return <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">{value}</span>;
   }
 
-  if (key === 'marketCapCr' || key === 'freeCashFlowCr' || key === 'price') {
-    const formatted = typeof value === 'number' ? `₹${value.toLocaleString('en-IN')}` : value;
+  if (key === 'marketCapCr' || key === 'freeCashFlowCr' || key === 'price' || key === 'bookValue' || key === 'faceValue' || key === 'pe' || key === 'sectorPe') {
+    const formatted = typeof value === 'number' ? 
+      (key === 'pe' || key === 'sectorPe' ? value.toFixed(1) : `₹${value.toLocaleString('en-IN')}`) 
+      : value;
     return <span className="font-mono text-[13px] text-slate-700">{formatted}</span>;
   }
 
