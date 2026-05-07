@@ -120,6 +120,40 @@ export default function App() {
   });
 
   const [visibleColumns, setVisibleColumns] = useState<ColumnKey[]>(DEFAULT_VISIBLE_COLUMNS);
+
+  const setQualityCompounders = () => {
+    setFilters({
+      ...filters,
+      minRoce: 20,
+      minRoe: 18,
+      maxDebtToEquity: 0.3,
+      minInterestCoverage: 5,
+      minRevenueGrowth: 15,
+      minEpsGrowth: 15,
+      maxPe: 40,
+    });
+  };
+
+  const setValuePicks = () => {
+    setFilters({
+      ...filters,
+      minRoce: 15,
+      maxDebtToEquity: 0.5,
+      maxPe: 20,
+      minRevenueGrowth: 8,
+    });
+  };
+
+  const setHighGrowth = () => {
+    setFilters({
+      ...filters,
+      minRevenueGrowth: 25,
+      minEpsGrowth: 25,
+      minRoce: 15,
+      maxDebtToEquity: 1,
+    });
+  };
+
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [showColumnManager, setShowColumnManager] = useState(false);
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
@@ -247,61 +281,72 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
-      {/* Header */}
-      <header className="h-14 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-sm">
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center shrink-0">
-            <TrendingUp className="w-5 h-5 text-white" />
+      <header className="h-auto md:h-20 bg-white border-b border-slate-200 px-4 md:px-6 py-4 md:py-0 flex flex-col md:flex-row md:items-center justify-between sticky top-0 z-20 shrink-0 shadow-sm gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-200">
+            <TrendingUp className="w-6 h-6 text-white" />
           </div>
-          <div className="overflow-hidden">
-            <span className="font-semibold text-sm md:text-lg tracking-tight truncate block">Stock Screener</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 px-2 py-1 bg-emerald-50 rounded text-emerald-600 text-[10px] font-bold uppercase tracking-tighter">
-            <Activity className="w-3 h-3 animate-pulse" />
-            Live Feed
+          <div>
+            <span className="font-bold text-lg tracking-tight block leading-none">AlphaScreener</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Live Indian Markets</span>
           </div>
         </div>
 
-        <div className="hidden lg:flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100">
-          <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> Market Cap &gt; 1K Cr</span>
-          <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Return on Capital &gt; 15%</span>
-          <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-400" /> Debt to Equity &lt; 1.0</span>
-          <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-400" /> Pledged Holding &lt; 15%</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mr-2 hidden lg:block">Guru Screens:</span>
+          <button 
+            onClick={setQualityCompounders}
+            className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold hover:bg-emerald-100 transition-colors border border-emerald-100 uppercase tracking-wider"
+          >
+            Quality Compounders
+          </button>
+          <button 
+            onClick={setValuePicks}
+            className="px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold hover:bg-amber-100 transition-colors border border-amber-100 uppercase tracking-wider"
+          >
+            Value Picks
+          </button>
+          <button 
+            onClick={setHighGrowth}
+            className="px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold hover:bg-indigo-100 transition-colors border border-indigo-100 uppercase tracking-wider"
+          >
+            High Growth
+          </button>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
           <button 
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className={`p-2 rounded-lg transition-colors text-slate-400 hover:bg-slate-100 ${isRefreshing ? 'animate-spin opacity-50' : ''}`}
+            className={`p-2.5 rounded-xl border border-slate-200 transition-all text-slate-500 hover:bg-slate-50 active:scale-95 ${isRefreshing ? 'animate-spin opacity-50' : ''}`}
             title="Refresh Live Data"
           >
-            <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
+            <RefreshCw className="w-4 h-4" />
           </button>
           <button 
             onClick={() => setShowFilterSidebar(true)}
-            className="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors"
+            className="flex items-center gap-2 p-2.5 bg-slate-900 border border-slate-900 rounded-xl text-white transition-all hover:bg-slate-800 shadow-lg shadow-slate-200 active:scale-95"
             title="Advanced Filters"
           >
-            <Filter className="w-5 h-5" />
-            <span className="hidden sm:inline text-xs font-bold uppercase tracking-widest">Filters</span>
+            <Filter className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-widest">Filters</span>
           </button>
-          <div className="relative">
+          <div className="relative hidden sm:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search..."
-              className="bg-slate-100 border-none rounded-full py-1.5 pl-9 pr-3 w-24 md:w-48 lg:w-64 text-xs md:text-sm focus:ring-1 focus:ring-indigo-500 transition-all outline-none"
+              placeholder="Quick search..."
+              className="bg-slate-100 border-none rounded-xl py-2 pl-9 pr-3 w-32 lg:w-48 text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all outline-none"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
           <button 
             onClick={() => setShowColumnManager(!showColumnManager)}
-            className={`p-2 rounded-lg transition-colors shrink-0 ${showColumnManager ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:bg-slate-100'}`}
+            className={`p-2.5 rounded-xl border transition-all shrink-0 active:scale-95 ${showColumnManager ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}
             title="Manage Columns"
           >
-            <Settings2 className="w-4 h-4 md:w-5 md:h-5" />
+            <Settings2 className="w-4 h-4" />
           </button>
         </div>
       </header>
@@ -776,7 +821,7 @@ function renderValue(key: ColumnKey, value: any, stock: Stock) {
   if (key === 'symbol') {
     return (
       <div className="flex flex-col">
-        <span className="font-bold text-slate-900 leading-none">{value}</span>
+        <span className="font-bold text-slate-900 leading-none group-hover:text-indigo-600 transition-colors">{value}</span>
       </div>
     );
   }
@@ -786,14 +831,22 @@ function renderValue(key: ColumnKey, value: any, stock: Stock) {
   }
 
   if (key === 'sector') {
-    return <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">{value}</span>;
+    return <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold uppercase tracking-wider">{value}</span>;
   }
 
   if (key === 'marketCapCr' || key === 'freeCashFlowCr' || key === 'price' || key === 'bookValue' || key === 'faceValue' || key === 'pe' || key === 'sectorPe') {
-    const formatted = typeof value === 'number' ? 
+    let formatted = typeof value === 'number' ? 
       (key === 'pe' || key === 'sectorPe' ? value.toFixed(1) : `₹${value.toLocaleString('en-IN')}`) 
       : value;
-    return <span className="font-mono text-[13px] text-slate-700">{formatted}</span>;
+    
+    // Valuation highlight
+    let style = "text-slate-700";
+    if (key === 'pe') {
+      if (stock.pe < stock.sectorPe * 0.7) style = "text-emerald-600 font-bold underline decoration-emerald-200 underline-offset-4";
+      if (stock.pe > stock.sectorPe * 2) style = "text-rose-500 font-medium";
+    }
+
+    return <span className={`font-mono text-[13px] ${style}`}>{formatted}</span>;
   }
 
   if (key.toString().toLowerCase().includes('pct') || 
@@ -801,34 +854,39 @@ function renderValue(key: ColumnKey, value: any, stock: Stock) {
       key.toString().toLowerCase().includes('roe') || 
       key.toString().toLowerCase().includes('growth')) {
     
-    const isHigh = typeof value === 'number' && value > 25;
-    const isMedium = typeof value === 'number' && value > 15;
+    const val = typeof value === 'number' ? value : 0;
+    const isHigh = val > 22;
+    const isMedium = val > 15;
+    const isNegative = val < 0;
     
     return (
-      <span className={`font-mono text-xs font-semibold ${isHigh ? 'text-indigo-600' : isMedium ? 'text-emerald-600' : 'text-slate-600'}`}>
+      <span className={`font-mono text-[13px] ${isHigh ? 'text-emerald-600 font-bold bg-emerald-50/50 px-1 rounded' : isMedium ? 'text-emerald-600 font-semibold' : isNegative ? 'text-rose-500 font-medium' : 'text-slate-600'}`}>
         {typeof value === 'number' ? `${value > 0 ? '+' : ''}${value.toFixed(1)}%` : value}
       </span>
     );
   }
 
   if (key === 'promoterHoldingTrend') {
+    const isIncreasing = value === 'Increasing';
+    const isStable = value === 'Stable';
     return (
-      <div className="flex items-center gap-1.5">
-        {value === 'Increasing' ? (
-          <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-        ) : (
-          <TrendingDown className="w-3.5 h-3.5 text-amber-500 opacity-40" />
+      <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded ${isIncreasing ? 'bg-emerald-50 text-emerald-700' : isStable ? 'bg-slate-50 text-slate-600' : 'bg-rose-50 text-rose-700'}`}>
+        {isIncreasing ? (
+          <TrendingUp className="w-3 h-3" />
+        ) : !isStable && (
+          <TrendingDown className="w-3 h-3" />
         )}
-        <span className="text-[10px] uppercase font-bold text-slate-500">{value}</span>
+        <span className="text-[10px] uppercase font-bold tracking-wider">{value}</span>
       </div>
     );
   }
 
   if (key === 'debtToEquity' || key === 'interestCoverageRatio') {
-    const isRisky = key === 'debtToEquity' && typeof value === 'number' && value > 0.8;
-    return <span className={`font-mono text-xs ${isRisky ? 'text-amber-600' : 'text-slate-600'}`}>{value}</span>;
+    const isRisky = key === 'debtToEquity' && typeof value === 'number' && value > 1.0;
+    const isSafe = key === 'debtToEquity' && typeof value === 'number' && value < 0.3;
+    return <span className={`font-mono text-[13px] ${isRisky ? 'text-rose-600 font-bold underline decoration-rose-200' : isSafe ? 'text-indigo-600 font-bold' : 'text-slate-600'}`}>{value}</span>;
   }
 
-  return <span className="text-sm text-slate-600">{value.toString()}</span>;
+  return <span className="text-sm text-slate-600">{value?.toString() || ''}</span>;
 }
 
