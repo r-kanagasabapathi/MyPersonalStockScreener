@@ -42,6 +42,7 @@ export interface Stock {
   revenueGrowth3y: number;
   ebitdaGrowth3y: number;
   epsGrowth3y: number;
+  intrinsicValue: number;
   vibe: string; // Brief description
 }
 
